@@ -4,27 +4,38 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import loginImage from "../assets/login.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { googleLogin, loginUser } from "../features/auth/authSlice";
+import {
+  googleLogin,
+  loginUser,
+  toggleLoading,
+} from "../features/auth/authSlice";
 import GoogleLogin from "../components/google/GoogleLogin";
 import toast from "react-hot-toast";
 const Login = () => {
   const { register, handleSubmit, reset } = useForm();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoading, email, error, isError } = useSelector((state) => state.auth);
+  const { isLoading, email, error, isError } = useSelector(
+    (state) => state.auth
+  );
 
   useEffect(() => {
     if (!isLoading && email) {
-      navigate('/')
+      navigate("/");
     }
     if (email) {
-      toast.success(`Successfully Login ${email}`)
+      toast.success(`Successfully Login`);
     }
+    // if (isLoading) {
+    //   toast.loading("Login processing...");
+    // } else if (email) {
+    //   dispatch(toggleLoading());
+    // }
   }, [email, isLoading]);
 
   useEffect(() => {
     if (error && isError) {
-      toast.error(error)
+      toast.error(error);
     }
   }, [error, isError]);
 
@@ -68,7 +79,7 @@ const Login = () => {
                 </button>
               </div>
               <div>
-                <GoogleLogin/>
+                <GoogleLogin />
               </div>
               <div>
                 <p>
