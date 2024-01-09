@@ -8,8 +8,7 @@ import {
 import auth from "../../firebase/firebase.config";
 
 const initialState = {
-  email: "",
-  role: "",
+  user: { email: "", role: "" },
   isLoading: true,
   isError: false,
   error: "",
@@ -23,6 +22,15 @@ export const createUser = createAsyncThunk(
     return data.user.email;
   }
 );
+export const getUser = createAsyncThunk("auth/getUser", async (email) => {
+  const res = await fetch(`${process.env.REACT_APP_DEV_URL}/user/${email}`);
+  const data = await res.json();
+
+  if (data?.status) {
+    return data;
+  }
+  return email;
+});
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async ({ email, password }) => {
@@ -32,31 +40,27 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-export const googleLogin = createAsyncThunk(
-  "auth/googleLogin",
-  async () => {
-    
-    const googleProvider = new GoogleAuthProvider();
-    const data = signInWithPopup(auth, googleProvider);
+export const googleLogin = createAsyncThunk("auth/googleLogin", async () => {
+  const googleProvider = new GoogleAuthProvider();
+  const data = signInWithPopup(auth, googleProvider);
 
-    return data.user.email;
-  }
-);
+  return data.user.email;
+});
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
     logout: (state) => {
-      state.email = "";
+      state.user.email = "";
     },
-    setUser : (state, action) => {
-      state.email = action.payload;
-      state.isLoading = false
-    }, 
-    toggleLoading : (state) => {
+    setUser: (state, action) => {
+      state.user.email = action.payload;
       state.isLoading = false;
-    }
+    },
+    toggleLoading: (state) => {
+      state.isLoading = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -67,14 +71,14 @@ const authSlice = createSlice({
       })
       .addCase(createUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.email = action.payload;
+        state.user.email = action.payload;
         state.isError = false;
         state.error = "";
       })
       .addCase(createUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.email = "";
+        state.user.email = "";
         state.error = action.error.message;
       })
       .addCase(loginUser.pending, (state) => {
@@ -84,14 +88,14 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.email = action.payload;
+        state.user.email = action.payload;
         state.isError = false;
         state.error = "";
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.email = "";
+        state.user.email = "";
         state.error = action.error.message;
       })
       .addCase(googleLogin.pending, (state) => {
@@ -101,14 +105,37 @@ const authSlice = createSlice({
       })
       .addCase(googleLogin.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.email = action.payload;
+        state.user.email = action.payload;
         state.isError = false;
         state.error = "";
       })
       .addCase(googleLogin.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.email = "";
+        state.user.email = "";
+        state.error = action.error.message;
+      })
+      .addCase(getUser.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.error = "";
+      })
+      .addCase(getUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        if (action.payload?.status) {
+          state.user = action?.payload?.data;
+        } else {
+          state.user.email = action?.payload;
+        }
+
+        state.isError = false;
+        state.error = "";
+      })
+      .addCase(getUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.user.email = "";
         state.error = action.error.message;
       });
   },
