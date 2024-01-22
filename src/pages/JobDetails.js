@@ -5,7 +5,7 @@ import { BsArrowRightShort, BsArrowReturnRight } from "react-icons/bs";
 import { useGetJobByIdQuery } from "../features/job/jobApi";
 import { useParams } from "react-router-dom";
 const JobDetails = () => {
-  const {id} = useParams();
+  const { id } = useParams();
   const { data, isError, isLoading, isSuccess } = useGetJobByIdQuery(id);
   const {
     companyName,
@@ -21,7 +21,12 @@ const JobDetails = () => {
     overview,
     queries,
     _id,
-  } = { data };
+  } = data?.data || {};
+
+  const handleApply = () => {
+    const data = {};
+    console.log(data)
+  }
 
   return (
     <div className="pt-14 grid grid-cols-12 gap-5">
@@ -32,7 +37,7 @@ const JobDetails = () => {
         <div className="space-y-5">
           <div className="flex justify-between items-center mt-5">
             <h1 className="text-xl font-semibold text-primary">{position}</h1>
-            <button className="btn">Apply</button>
+            <button onClick={handleApply} className="btn">Apply</button>
           </div>
           <div>
             <h1 className="text-primary text-lg font-medium mb-3">Overview</h1>
