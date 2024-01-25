@@ -2,7 +2,7 @@ import React from "react";
 
 import meeting from "../assets/meeting.jpg";
 import { BsArrowRightShort, BsArrowReturnRight } from "react-icons/bs";
-import { useGetJobByIdQuery } from "../features/job/jobApi";
+import { useApplyMutation, useGetJobByIdQuery } from "../features/job/jobApi";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
@@ -11,6 +11,7 @@ const JobDetails = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state?.auth);
   const { data, isError, isLoading, isSuccess } = useGetJobByIdQuery(id);
+  const [apply] = useApplyMutation();
   const {
     companyName,
     position,
@@ -43,7 +44,8 @@ const JobDetails = () => {
       email: user?.email,
       jobId: _id,
     };
-    console.log(data);
+
+    apply(data);
   };
 
   return (
